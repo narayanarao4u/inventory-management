@@ -1,12 +1,19 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { Package, PackagePlus, PackageMinus, LayoutDashboard } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Package, PackagePlus, PackageMinus, LayoutDashboard, LogOut } from 'lucide-react';
 
 interface LayoutProps {
   children: React.ReactNode;
 }
 
 export function Layout({ children }: LayoutProps) {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    navigate('/login');
+  };
+
   return (
     <div className="min-h-screen bg-gray-100">
       <nav className="bg-white shadow-md">
@@ -40,6 +47,13 @@ export function Layout({ children }: LayoutProps) {
                 <PackageMinus className="h-5 w-5 mr-1" />
                 Stock Issued
               </Link>
+              <button
+                onClick={handleLogout}
+                className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
+              >
+                <LogOut className="h-5 w-5 mr-1" />
+                Logout
+              </button>
             </div>
           </div>
         </div>

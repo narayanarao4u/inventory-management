@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import  { useState, useEffect } from 'react';
 
 interface StockBalanceItem {
   id: number;
@@ -12,15 +12,32 @@ interface StockBalanceItem {
 
 export function StockBalance() {
   const [items, setItems] = useState<StockBalanceItem[]>([]);
+  const token = localStorage.getItem('token'); // Assuming token is stored in localStorage
 
   useEffect(() => {
-    fetchStockBalance();
-  }, []);
+    if (token) {
+      fetchStockBalance();
+    } else {
+      console.error('No token found');
+    }
+  }, [token]);
 
-  const fetchStockBalance = async () => {
-    const response = await fetch('http://localhost:3000/api/stock/balance');
-    const data = await response.json();
-    setItems(data);
+  const fetchStockBalance = async () => {    
+    const response = await fetch('http://localhost:3000/api/stock/balance', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    if (response.status === 403) {
+      console.error('Access forbidden: Invalid token');
+      return;
+    }
+    if (response.ok) {
+      const data = await response.json();
+      setItems(data);
+    } else {
+      console.error('Failed to fetch stock balance');
+    }
   };
 
   return (

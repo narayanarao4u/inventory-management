@@ -22,13 +22,18 @@ export function StockReceived() {
     received_Date: new Date().toISOString().split('T')[0]
   });
   const [editId, setEditId] = useState<number | null>(null);
+  const token = localStorage.getItem('token'); // Assuming token is stored in localStorage
 
   useEffect(() => {
     fetchStockReceived();
   }, []);
 
   const fetchStockReceived = async () => {
-    const response = await fetch('http://localhost:3000/api/stock/received');
+    const response = await fetch('http://localhost:3000/api/stock/received', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
     const data = await response.json();
     setItems(data);
   };
@@ -43,6 +48,7 @@ export function StockReceived() {
       method,
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
       },
       body: JSON.stringify({
         ...formData,
@@ -74,6 +80,9 @@ export function StockReceived() {
   const handleDelete = async (id: number) => {
     const response = await fetch(`http://localhost:3000/api/stock/receive/${id}`, {
       method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
     });
 
     if (response.ok) {
