@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, Edit, Trash } from 'lucide-react';
 
 interface StockReceivedItem {
   id: number;
@@ -8,6 +8,7 @@ interface StockReceivedItem {
   qty: number;
   price: number;
   amt: number;
+  received_Date: string;
   created_at: string;
 }
 
@@ -16,9 +17,11 @@ export function StockReceived() {
   const [formData, setFormData] = useState({
     bill_id: '',
     itemName: '',
-    qty: '',
-    price: ''
+    qty: '1',
+    price: '',
+    received_Date: new Date().toISOString().split('T')[0]
   });
+  const [editId, setEditId] = useState<number | null>(null);
 
   useEffect(() => {
     fetchStockReceived();
@@ -33,8 +36,11 @@ export function StockReceived() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    const response = await fetch('http://localhost:3000/api/stock/receive', {
-      method: 'POST',
+    const method = editId ? 'PUT' : 'POST';
+    const url = editId ? `http://localhost:3000/api/stock/receive/${editId}` : 'http://localhost:3000/api/stock/receive';
+    
+    const response = await fetch(url, {
+      method,
       headers: {
         'Content-Type': 'application/json',
       },
@@ -46,12 +52,37 @@ export function StockReceived() {
     });
 
     if (response.ok) {
-      setFormData({ bill_id: '', itemName: '', qty: '', price: '' });
+      setFormData({ bill_id: '', itemName: '', qty: '1', price: '', received_Date: new Date().toISOString().split('T')[0] });
+      setEditId(null);
+      fetchStockReceived();
+    }
+  };
+
+  const handleEdit = (item: StockReceivedItem) => {
+    const receivedDate = item.received_Date ? item.received_Date.split('T')[0] : '';
+    
+    setFormData({
+      bill_id: item.bill_id,
+      itemName: item.itemName,
+      qty: item.qty.toString(),
+      price: item.price.toString(),
+      received_Date: receivedDate
+    });
+    setEditId(item.id);
+  };
+
+  const handleDelete = async (id: number) => {
+    const response = await fetch(`http://localhost:3000/api/stock/receive/${id}`, {
+      method: 'DELETE',
+    });
+
+    if (response.ok) {
       fetchStockReceived();
     }
   };
 
   return (
+    <>    
     <div>
       <h2 className="text-2xl font-bold mb-6">Stock Received</h2>
       
@@ -98,6 +129,16 @@ export function StockReceived() {
               required
             />
           </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Received Date</label>
+            <input
+              type="date"
+              value={formData.received_Date}
+              onChange={(e) => setFormData({ ...formData, received_Date: e.target.value })}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              required
+            />
+          </div>
         </div>
         <div className="mt-4">
           <button
@@ -105,7 +146,7 @@ export function StockReceived() {
             className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
           >
             <Plus className="h-4 w-4 mr-2" />
-            Add Stock
+            {editId ? 'Update Stock' : 'Add Stock'}
           </button>
         </div>
       </form>
@@ -119,7 +160,9 @@ export function StockReceived() {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Received Date</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created At</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -131,7 +174,18 @@ export function StockReceived() {
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${item.price.toFixed(2)}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${item.amt.toFixed(2)}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  {new Date(item.received_Date).toLocaleDateString()}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {new Date(item.created_at).toLocaleDateString()}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <button onClick={() => handleEdit(item)} className="text-blue-600 hover:text-blue-900 mr-2">
+                    <Edit className="h-4 w-4" />
+                  </button>
+                  <button onClick={() => handleDelete(item.id)} className="text-red-600 hover:text-red-900">
+                    <Trash className="h-4 w-4" />
+                  </button>
                 </td>
               </tr>
             ))}
@@ -139,5 +193,10 @@ export function StockReceived() {
         </table>
       </div>
     </div>
+    <hr />
+    <pre>
+      {JSON.stringify(formData, null, 2)}
+    </pre>
+    </>
   );
 }
