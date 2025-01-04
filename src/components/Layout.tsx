@@ -4,15 +4,10 @@ import { Package, PackagePlus, PackageMinus, LayoutDashboard, LogOut } from 'luc
 
 interface LayoutProps {
   children: React.ReactNode;
+  onLogout: () => void; // Add this
 }
 
-export function Layout({ children }: LayoutProps) {
-  const navigate = useNavigate(); // Add this line
-
-  const handleLogout = () => {
-    localStorage.removeItem('token'); // Clear the token
-    navigate('/login'); // Redirect to login page
-  };
+export function Layout({ children, onLogout }: LayoutProps) {
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -49,7 +44,7 @@ export function Layout({ children }: LayoutProps) {
               </Link>
 
               <button
-                onClick={handleLogout}
+                onClick={onLogout} // Use the prop here
                 className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
               >
                 <LogOut className="h-5 w-5 mr-1" />

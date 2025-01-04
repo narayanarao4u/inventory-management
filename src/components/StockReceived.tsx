@@ -96,7 +96,7 @@ export function StockReceived() {
     <div>
       <h2 className="text-2xl font-bold mb-6">Stock Received</h2>
       
-      <form onSubmit={handleSubmit} className="formBg p-6 rounded-lg shadow-md mb-6">
+      <form onSubmit={handleSubmit} className="formBg-1 p-6 rounded-lg shadow-md mb-6">
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700">Bill ID</label>
