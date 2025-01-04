@@ -1,33 +1,44 @@
-export const initializeDatabase = (db) => {
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS users (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      username TEXT NOT NULL UNIQUE,
-      password TEXT NOT NULL,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    );
+export const initializeDatabase = async (db) => {
+  await db.schema.hasTable('users').then(exists => {
+    if (!exists) {
+      return db.schema.createTable('users', table => {
+        table.increments('id').primary();
+        table.string('username').notNullable().unique();
+        table.string('password').notNullable();
+        table.timestamp('created_at').defaultTo(db.fn.now());
+      });
+    }
+  });
 
-    CREATE TABLE IF NOT EXISTS stockReceived (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      bill_id TEXT NOT NULL,
-      itemName TEXT NOT NULL,
-      qty INTEGER NOT NULL,
-      price DECIMAL(10,2) NOT NULL,
-      amt DECIMAL(10,2) NOT NULL,
-      received_Date DATETIME NOT NULL,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    );
+  await db.schema.hasTable('stockReceived').then(exists => {
+    if (!exists) {
+      return db.schema.createTable('stockReceived', table => {
+        table.increments('id').primary();
+        table.string('bill_id').notNullable();
+        table.string('itemName').notNullable();
+        table.integer('qty').notNullable();
+        table.decimal('price', 10, 2).notNullable();
+        table.decimal('amt', 10, 2).notNullable();
+        table.timestamp('received_Date').notNullable();
+        table.timestamp('created_at').defaultTo(db.fn.now());
+      });
+    }
+  });
 
-    CREATE TABLE IF NOT EXISTS stockIssued (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      stockReceived_id INTEGER NOT NULL,
-      qty INTEGER NOT NULL,
-      user TEXT NOT NULL,
-      issued_Date DATETIME NOT NULL,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (stockReceived_id) REFERENCES stockReceived(id)
-    );
+  await db.schema.hasTable('stockIssued').then(exists => {
+    if (!exists) {
+      return db.schema.createTable('stockIssued', table => {
+        table.increments('id').primary();
+        table.integer('stockReceived_id').notNullable().references('id').inTable('stockReceived');
+        table.integer('qty').notNullable();
+        table.string('user').notNullable();
+        table.timestamp('issued_Date').notNullable();
+        table.timestamp('created_at').defaultTo(db.fn.now());
+      });
+    }
+  });
 
+  await db.schema.raw(`
     CREATE VIEW IF NOT EXISTS stockBalance AS
     SELECT 
       sr.id,

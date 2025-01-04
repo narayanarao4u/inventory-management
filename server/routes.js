@@ -11,9 +11,8 @@ const routes = (db, SECRET_KEY) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     try {
-      const stmt = db.prepare('INSERT INTO users (username, password) VALUES (?, ?)');
-      const result = stmt.run(username, hashedPassword);
-      res.json({ id: result.lastInsertRowid });
+      const [id] = await db('users').insert({ username, password: hashedPassword });
+      res.json({ id });
     } catch (error) {
       res.status(400).json({ error: 'Username already exists' });
     }
@@ -22,7 +21,7 @@ const routes = (db, SECRET_KEY) => {
   // User login
   router.post('/login', async (req, res) => {
     const { username, password } = req.body;
-    const user = db.prepare('SELECT * FROM users WHERE username = ?').get(username);
+    const user = await db('users').where({ username }).first();
 
     if (user && await bcrypt.compare(password, user.password)) {
       const token = jwt.sign({ id: user.id, username: user.username }, SECRET_KEY, { expiresIn: '1h' });
@@ -46,80 +45,66 @@ const routes = (db, SECRET_KEY) => {
   };
 
   // Routes for stock received
-  router.post('/stock/receive', authenticateToken, (req, res) => {
+  router.post('/stock/receive', authenticateToken, async (req, res) => {
     const { bill_id, itemName, qty, price, received_Date } = req.body;
     const amt = qty * price;
-    
-    const stmt = db.prepare(
-      'INSERT INTO stockReceived (bill_id, itemName, qty, price, amt, received_Date) VALUES (?, ?, ?, ?, ?, ?)'
-    );
-    const result = stmt.run(bill_id, itemName, qty, price, amt, received_Date);
-    res.json({ id: result.lastInsertRowid });
+
+    const [id] = await db('stockReceived').insert({ bill_id, itemName, qty, price, amt, received_Date });
+    res.json({ id });
   });
 
-  router.put('/stock/receive/:id', authenticateToken, (req, res) => {
+  router.put('/stock/receive/:id', authenticateToken, async (req, res) => {
     const { id } = req.params;
     const { bill_id, itemName, qty, price, received_Date } = req.body;
     const amt = qty * price;
-    
-    const stmt = db.prepare(
-      'UPDATE stockReceived SET bill_id = ?, itemName = ?, qty = ?, price = ?, amt = ?, received_Date = ? WHERE id = ?'
-    );
-    const result = stmt.run(bill_id, itemName, qty, price, amt, received_Date, id);
-    res.json({ changes: result.changes });
+
+    const changes = await db('stockReceived').where({ id }).update({ bill_id, itemName, qty, price, amt, received_Date });
+    res.json({ changes });
   });
 
-  router.delete('/stock/receive/:id', authenticateToken, (req, res) => {
+  router.delete('/stock/receive/:id', authenticateToken, async (req, res) => {
     const { id } = req.params;
-    
-    const stmt = db.prepare('DELETE FROM stockReceived WHERE id = ?');
-    const result = stmt.run(id);
-    res.json({ changes: result.changes });
+
+    const changes = await db('stockReceived').where({ id }).del();
+    res.json({ changes });
   });
 
-  router.get('/stock/received', authenticateToken, (req, res) => {
-    const stocks = db.prepare('SELECT * FROM stockReceived ORDER BY created_at DESC').all();
+  router.get('/stock/received', authenticateToken, async (req, res) => {
+    const stocks = await db('stockReceived').orderBy('created_at', 'desc');
     res.json(stocks);
   });
 
   // Routes for stock issued
-  router.post('/stock/issue', authenticateToken, (req, res) => {
+  router.post('/stock/issue', authenticateToken, async (req, res) => {
     const { stockReceived_id, qty, user, issued_Date } = req.body;
-    
-    const stmt = db.prepare(
-      'INSERT INTO stockIssued (stockReceived_id, qty, user, issued_Date) VALUES (?, ?, ?, ?)'
-    );
-    const result = stmt.run(stockReceived_id, qty, user, issued_Date);
-    res.json({ id: result.lastInsertRowid });
+
+    const [id] = await db('stockIssued').insert({ stockReceived_id, qty, user, issued_Date });
+    res.json({ id });
   });
 
-  router.put('/stock/issue/:id', authenticateToken, (req, res) => {
+  router.put('/stock/issue/:id', authenticateToken, async (req, res) => {
     const { id } = req.params;
     const { stockReceived_id, qty, user, issued_Date } = req.body;
-    
-    const stmt = db.prepare(
-      'UPDATE stockIssued SET stockReceived_id = ?, qty = ?, user = ?, issued_Date = ? WHERE id = ?'
-    );
-    const result = stmt.run(stockReceived_id, qty, user, issued_Date, id);
-    res.json({ changes: result.changes });
+
+    const changes = await db('stockIssued').where({ id }).update({ stockReceived_id, qty, user, issued_Date });
+    res.json({ changes });
   });
 
-  router.delete('/stock/issue/:id', authenticateToken, (req, res) => {
+  router.delete('/stock/issue/:id', authenticateToken, async (req, res) => {
     const { id } = req.params;
-    
-    const stmt = db.prepare('DELETE FROM stockIssued WHERE id = ?');
-    const result = stmt.run(id);
-    res.json({ changes: result.changes });
+
+    const changes = await db('stockIssued').where({ id }).del();
+    res.json({ changes });
   });
 
-  router.get('/stock/issued', authenticateToken, (req, res) => {
-    const issues = db.prepare('SELECT * FROM stockIssued ORDER BY created_at DESC').all();
+  router.get('/stock/issued', authenticateToken, async (req, res) => {
+    const issues = await db('stockIssued').orderBy('created_at', 'desc');
     res.json(issues);
   });
 
   // Route for stock balance
-  router.get('/stock/balance', authenticateToken, (req, res) => {
-    const balance = db.prepare('SELECT * FROM stockBalance').all();
+  router.get('/stock/balance', authenticateToken, async (req, res) => {
+    const balance = await db.select('*').from('stockBalance');
     res.json(balance);
   });
 
