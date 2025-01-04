@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Send, Edit, Trash } from 'lucide-react';
+import moment from 'moment';
 
 interface StockIssuedItem {
   id: number;
@@ -27,6 +28,7 @@ export function StockIssued() {
   });
   const [editId, setEditId] = useState<number | null>(null);
   const token = localStorage.getItem('token'); // Assuming token is stored in localStorage
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     fetchStockIssued();
@@ -111,12 +113,14 @@ export function StockIssued() {
     return item ? item.itemName : 'Unknown';
   };
 
+  const filterData  = items.filter(item => item.user.toLowerCase().includes(searchTerm.toLowerCase()));
+
   return (
     <div>
       <h2 className="text-2xl font-bold mb-6">Stock Issued</h2>
       
-      <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <form onSubmit={handleSubmit} className="bg-green-100 p-3 rounded-lg shadow-md mb-3">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700">Item</label>
             <select
@@ -139,7 +143,7 @@ export function StockIssued() {
               type="number"
               value={formData.qty}
               onChange={(e) => setFormData({ ...formData, qty: e.target.value })}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              className="mt-1 px-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
               required
             />
           </div>
@@ -163,8 +167,7 @@ export function StockIssued() {
               required
             />
           </div>
-        </div>
-        <div className="mt-4">
+          <div className="mt-4">
           <button
             type="submit"
             className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
@@ -173,35 +176,45 @@ export function StockIssued() {
             {editId ? 'Update Stock' : 'Issue Stock'}
           </button>
         </div>
+        </div>
+
       </form>
 
       <div className="bg-white shadow-md rounded-lg overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item Name</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Issued Date</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created At</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              <th className="table-header">ID</th>
+              <th className="table-header">Item Name</th>
+              <th className="table-header">Quantity</th>
+              <th className="table-header">User
+              <input 
+          type="text" 
+          placeholder="Search Item Name" 
+          value={searchTerm} 
+          onChange={(e) => setSearchTerm(e.target.value)} 
+          className="border p-2 rounded mx-2"
+        />
+              </th>
+              <th className="table-header">Issued Date</th>
+              {/* <th className="table-header">Created At</th> */}
+              <th className="table-header">Actions</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {items.map((item) => (
+            {filterData.map((item) => (
               <tr key={item.id}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.id}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{getItemName(item.stockReceived_id)}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.qty}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.user}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {new Date(item.issued_Date).toLocaleDateString()}
+                <td className="table-cell">{item.id}</td>
+                <td className="table-cell">{getItemName(item.stockReceived_id)}</td>
+                <td className="table-cell">{item.qty}</td>
+                <td className="table-cell">{item.user}</td>
+                <td className="table-cell">
+                  {moment(item.issued_Date).format('DD-MM-YYYY')}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {/* <td className="table-cell">
                   {new Date(item.created_at).toLocaleDateString()}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                </td> */}
+                <td className="table-cell">
                   <button onClick={() => handleEdit(item)} className="text-blue-600 hover:text-blue-900 mr-2">
                     <Edit className="h-4 w-4" />
                   </button>

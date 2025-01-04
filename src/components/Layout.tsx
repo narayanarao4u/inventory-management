@@ -7,11 +7,11 @@ interface LayoutProps {
 }
 
 export function Layout({ children }: LayoutProps) {
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // Add this line
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    navigate('/login');
+    localStorage.removeItem('token'); // Clear the token
+    navigate('/login'); // Redirect to login page
   };
 
   return (
@@ -47,6 +47,7 @@ export function Layout({ children }: LayoutProps) {
                 <PackageMinus className="h-5 w-5 mr-1" />
                 Stock Issued
               </Link>
+
               <button
                 onClick={handleLogout}
                 className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"

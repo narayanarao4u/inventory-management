@@ -104,7 +104,7 @@ const routes = (db, SECRET_KEY) => {
 
   // Route for stock balance
   router.get('/stock/balance', authenticateToken, async (req, res) => {
-    const balance = await db.select('*').from('stockBalance');
+    const balance = await db.select('*').from('stockBalance')
     res.json(balance);
   });
 

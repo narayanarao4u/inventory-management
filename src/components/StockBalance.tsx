@@ -12,6 +12,8 @@ interface StockBalanceItem {
 
 export function StockBalance() {
   const [items, setItems] = useState<StockBalanceItem[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [balanceFilter, setBalanceFilter] = useState<number | null>(null);
   const token = localStorage.getItem('token'); // Assuming token is stored in localStorage
 
   useEffect(() => {
@@ -40,32 +42,54 @@ export function StockBalance() {
     }
   };
 
+  const filteredItems = items.filter(item => 
+    item.itemName.toLowerCase().includes(searchTerm.toLowerCase()) &&
+    (balanceFilter === null || item.balance_qty >= balanceFilter)
+  );
+
   return (
     <div>
       <h2 className="text-2xl font-bold mb-6">Stock Balance</h2>
       
+      <div className="mb-4">
+        <input 
+          type="text" 
+          placeholder="Search Item Name" 
+          value={searchTerm} 
+          onChange={(e) => setSearchTerm(e.target.value)} 
+          className="border p-2 rounded"
+        />
+        <input 
+          type="number" 
+          placeholder="Filter by Balance" 
+          value={balanceFilter !== null ? balanceFilter : ''} 
+          onChange={(e) => setBalanceFilter(e.target.value ? parseInt(e.target.value) : null)} 
+          className="border p-2 rounded ml-2"
+        />
+      </div>
+
       <div className="bg-white shadow-md rounded-lg overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item Name</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Received</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Issued</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Balance</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Unit Price</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Value</th>
+              <th className="table-header">Item Name</th>
+              <th className="table-header">Received</th>
+              <th className="table-header">Issued</th>
+              <th className="table-header">Balance</th>
+              <th className="table-header">Unit Price</th>
+              <th className="table-header">Total Value</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {items.map((item) => (
+            {filteredItems.map((item) => (
               <tr key={item.id}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.itemName}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.received_qty}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.issued_qty}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.balance_qty}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${item.price.toFixed(2)}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  ${(item.balance_qty * item.price).toFixed(2)}
+                <td className="table-cell">{item.itemName}</td>
+                <td className="table-cell">{item.received_qty}</td>
+                <td className="table-cell">{item.issued_qty}</td>
+                <td className="table-cell">{item.balance_qty}</td>
+                <td className="table-cell">Rs. {item.price.toFixed(2)}</td>
+                <td className="table-cell">
+                  Rs. {(item.balance_qty * item.price).toFixed(2)}
                 </td>
               </tr>
             ))}

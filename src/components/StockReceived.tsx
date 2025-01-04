@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit, Trash } from 'lucide-react';
+import moment from 'moment';
 
 interface StockReceivedItem {
   id: number;
@@ -95,8 +96,8 @@ export function StockReceived() {
     <div>
       <h2 className="text-2xl font-bold mb-6">Stock Received</h2>
       
-      <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <form onSubmit={handleSubmit} className="formBg p-6 rounded-lg shadow-md mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700">Bill ID</label>
             <input
@@ -162,33 +163,33 @@ export function StockReceived() {
 
       <div className="bg-white shadow-md rounded-lg overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+          <thead className="bg-blue-100">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bill ID</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item Name</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Received Date</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created At</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              <th className="table-header">Bill ID</th>
+              <th className="table-header">Item Name</th>
+              <th className="table-header">Quantity</th>
+              <th className="table-header">Price</th>
+              <th className="table-header">Amount</th>
+              <th className="table-header">Received Date</th>
+              {/* <th className="table-header">Created At</th> */}
+              <th className="table-header">Actions</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {items.map((item) => (
               <tr key={item.id}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.bill_id}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.itemName}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.qty}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${item.price.toFixed(2)}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${item.amt.toFixed(2)}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {new Date(item.received_Date).toLocaleDateString()}
+                <td className="table-cell">{item.bill_id}</td>
+                <td className="table-cell">{item.itemName}</td>
+                <td className="table-cell">{item.qty}</td>
+                <td className="table-cell">${item.price.toFixed(2)}</td>
+                <td className="table-cell">${item.amt.toFixed(2)}</td>
+                <td className="table-cell">
+                  {moment(item.received_Date).format('YYYY-MM-DD')}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {/* <td className="table-cell">
                   {new Date(item.created_at).toLocaleDateString()}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                </td> */}
+                <td className="table-cell">
                   <button onClick={() => handleEdit(item)} className="text-blue-600 hover:text-blue-900 mr-2">
                     <Edit className="h-4 w-4" />
                   </button>
@@ -202,10 +203,8 @@ export function StockReceived() {
         </table>
       </div>
     </div>
-    <hr />
-    <pre>
-      {JSON.stringify(formData, null, 2)}
-    </pre>
+
+
     </>
   );
 }
