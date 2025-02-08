@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+const SERVER_URL = import.meta.env.VITE_SERVER_URL;
 
 export function Signup() {
   const [formData, setFormData] = useState({ username: '', password: '' });
@@ -7,7 +8,7 @@ export function Signup() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    const response = await fetch('http://localhost:3000/api/signup', {
+    const response = await fetch(`${SERVER_URL}/api/signup`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

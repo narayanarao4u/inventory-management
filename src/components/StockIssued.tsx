@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Send, Edit, Trash } from 'lucide-react';
 import moment from 'moment';
+const SERVER_URL = import.meta.env.VITE_SERVER_URL;
 
 interface StockIssuedItem {
   id: number;
@@ -36,7 +37,7 @@ export function StockIssued() {
   }, []);
 
   const fetchStockIssued = async () => {
-    const response = await fetch('http://localhost:3000/api/stock/issued', {
+    const response = await fetch(`${SERVER_URL}/api/stock/issued`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -46,7 +47,7 @@ export function StockIssued() {
   };
 
   const fetchStockBalance = async () => {
-    const response = await fetch('http://localhost:3000/api/stock/balance', {
+    const response = await fetch(`${SERVER_URL}/api/stock/balance`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -59,7 +60,7 @@ export function StockIssued() {
     e.preventDefault();
     
     const method = editId ? 'PUT' : 'POST';
-    const url = editId ? `http://localhost:3000/api/stock/issue/${editId}` : 'http://localhost:3000/api/stock/issue';
+    const url = editId ? `${SERVER_URL}/api/stock/issue/${editId}` : `${SERVER_URL}/api/stock/issue`;
     
     const response = await fetch(url, {
       method,
@@ -95,7 +96,7 @@ export function StockIssued() {
   };
 
   const handleDelete = async (id: number) => {
-    const response = await fetch(`http://localhost:3000/api/stock/issue/${id}`, {
+    const response = await fetch(`${SERVER_URL}/api/stock/issue/${id}`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${token}`
@@ -189,12 +190,12 @@ export function StockIssued() {
               <th className="table-header">Quantity</th>
               <th className="table-header">User
               <input 
-          type="text" 
-          placeholder="Search Item Name" 
-          value={searchTerm} 
-          onChange={(e) => setSearchTerm(e.target.value)} 
-          className="border p-2 rounded mx-2"
-        />
+                  type="text" 
+                  placeholder="Search Item Name" 
+                  value={searchTerm} 
+                  onChange={(e) => setSearchTerm(e.target.value)} 
+                  className="border p-2 rounded mx-2 bg-violet-200 text-black"
+                />
               </th>
               <th className="table-header">Issued Date</th>
               {/* <th className="table-header">Created At</th> */}

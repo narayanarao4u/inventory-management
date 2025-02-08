@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Edit, Trash } from 'lucide-react';
 import moment from 'moment';
 
+// Use process.env.REACT_APP_SERVER_URL directly in the component
+const SERVER_URL = import.meta.env.VITE_SERVER_URL;
+console.log('Server URL:', SERVER_URL); // Add this line to verify the value
+
 interface StockReceivedItem {
   id: number;
   bill_id: string;
@@ -30,7 +34,7 @@ export function StockReceived() {
   }, []);
 
   const fetchStockReceived = async () => {
-    const response = await fetch('http://localhost:3000/api/stock/received', {
+    const response = await fetch(`${SERVER_URL}/api/stock/received`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -43,7 +47,7 @@ export function StockReceived() {
     e.preventDefault();
     
     const method = editId ? 'PUT' : 'POST';
-    const url = editId ? `http://localhost:3000/api/stock/receive/${editId}` : 'http://localhost:3000/api/stock/receive';
+    const url = editId ? `${SERVER_URL}/api/stock/receive/${editId}` : `${SERVER_URL}/api/stock/receive`;
     
     const response = await fetch(url, {
       method,
@@ -79,7 +83,7 @@ export function StockReceived() {
   };
 
   const handleDelete = async (id: number) => {
-    const response = await fetch(`http://localhost:3000/api/stock/receive/${id}`, {
+    const response = await fetch(`${SERVER_URL}/api/stock/receive/${id}`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${token}`
@@ -181,8 +185,8 @@ export function StockReceived() {
                 <td className="table-cell">{item.bill_id}</td>
                 <td className="table-cell">{item.itemName}</td>
                 <td className="table-cell">{item.qty}</td>
-                <td className="table-cell">${item.price.toFixed(2)}</td>
-                <td className="table-cell">${item.amt.toFixed(2)}</td>
+                <td className="table-cell">Rs. {item.price.toFixed(2)}</td>
+                <td className="table-cell">Rs. {item.amt.toFixed(2)}</td>
                 <td className="table-cell">
                   {moment(item.received_Date).format('YYYY-MM-DD')}
                 </td>

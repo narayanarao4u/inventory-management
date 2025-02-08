@@ -1,4 +1,5 @@
-import  { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+const SERVER_URL = import.meta.env.VITE_SERVER_URL;
 
 interface StockBalanceItem {
   id: number;
@@ -24,8 +25,8 @@ export function StockBalance() {
     }
   }, [token]);
 
-  const fetchStockBalance = async () => {    
-    const response = await fetch('http://localhost:3000/api/stock/balance', {
+  const fetchStockBalance = async () => {
+    const response = await fetch(`${SERVER_URL}/api/stock/balance`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
