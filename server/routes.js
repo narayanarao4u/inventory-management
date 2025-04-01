@@ -8,12 +8,16 @@ const routes = (db, SECRET_KEY) => {
   // User signup
   router.post('/signup', async (req, res) => {
     const { username, password } = req.body;
+    console.log(username, password);
+    
     const hashedPassword = await bcrypt.hash(password, 10);
 
     try {
       const [id] = await db('users').insert({ username, password: hashedPassword });
       res.json({ id });
     } catch (error) {
+      console.log(error);
+      
       res.status(400).json({ error: 'Username already exists' });
     }
   });

@@ -11,13 +11,22 @@ const app = express();
 const db = knex({
   client: 'mssql',
   connection: {
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME
+    host: "10.34.130.254",
+    user: "sa",
+    password: "bsnl@123",
+    database: "inventory",
+   
+    options: {
+      encrypt: true, // Use SSL/TLS encryption
+      trustServerCertificate: true, // Bypass certificate validation
+     
+    },
+    
+
   }
 });
-const SECRET_KEY = process.env.SECRET_KEY;
+const SECRET_KEY = "your_secret_key"; // Replace with your actual secret key;
+
 
 app.use(cors());
 app.use(express.json());
@@ -26,7 +35,7 @@ app.use(express.json());
 
 app.use('/api', routes(db, SECRET_KEY));
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Server running on port http://localhost:${PORT}/`);
 });
